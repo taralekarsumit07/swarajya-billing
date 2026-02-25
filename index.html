@@ -5,6 +5,7 @@
   <title>SWARAJYA CARCARE Billing</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
@@ -12,7 +13,6 @@
         font-family:Arial;
         margin:0;
         background:#f2f2f2;
-        color:#333;
     }
     .container{
         max-width:900px;
@@ -57,24 +57,13 @@
 
     @media print{
     button,input,select{display:none;}
-    body::before{
-    content:"";
-    position:fixed;
-    top:25%;
-    left:20%;
-    width:400px;
-    height:400px;
-    background:url('logo.png') no-repeat center;
-    background-size:contain;
-    opacity:0.06;
-    z-index:-1;
-    }
     }
   </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div class="container" id="loginPage">
   <img src="logo.png" class="logo">
   <h2 style="text-align:center;">SWARAJYA CARCARE</h2>
@@ -84,9 +73,22 @@
   <button class="loginBtn" onclick="login()">Login</button>
 </div>
 
+<!-- BILLING -->
 <div class="container" id="billingPage" style="display:none;">
-  <img src="logo.png" class="logo">
-  <h2 style="text-align:center;">SWARAJYA CARCARE</h2>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+
+    <img src="logo.png" style="height:180px;">
+
+    <div style="text-align:right;">
+      <b style="font-size:20px;">SWARAJYA CARCARE</b><br>
+      Shop No. 12, Market Road<br>
+      Mumbai - 400001<br>
+      Mo: 8983521107
+    </div>
+
+  </div>
+  <hr>
 
   <p><b>Invoice No:</b> <span id="invoiceNo"></span></p>
   <p><b>Date:</b> <span id="date"></span></p>
@@ -94,31 +96,52 @@
   Customer:
   <input type="text" id="customer">
 
-
   Service:
   <select id="service" onchange="setPrice()">
+
     <option value="">-- Select Service --</option>
-    <option value="60">Bike Wash Small - 60</option>
-    <option value="80">Bike Wash Big - 80</option>
-    <option value="150">Car Outside Cleaning - 150</option>
-    <option value="300">Car Full Small - 300</option>
-    <option value="350">Car Full Big - 350</option>
-    <option value="100">Nitrogen Air - 100</option>
-    <option value="30">Normal Air - 30</option>
-    <option value="300">3D Alignment - 300</option>
-    <option value="80">Tyre Balancing - 80</option>
+
+    <!-- Basic Services -->
+    <option value="30">Tyre Balancing - 30</option>
+    <option value="0">Car Outside Washing</option>
+    <option value="0">Bike Wash</option>
+
+    <!-- Car Cleaning -->
+    <option value="30">8D Cleaning - 30</option>
+    <option value="2200">Internal Cleaning - 2200</option>
+    <option value="2000">External Cleaning - 2000</option>
+    <option value="0">Engine Cleaning</option>
+    <option value="2000">Glass Treatment - 2000</option>
+    <option value="400">Water Spot Removal - 400</option>
+
+    <!-- 2 Wheeler -->
+    <option value="2000">Ceramic Coating (2W) - 2000</option>
+    <option value="3000">Graphene Coating (2W) - 3000</option>
+    <option value="3500">Graphene Premium (2W) - 3500</option>
+    <option value="800">Polishing (2W) - 800</option>
+
+    <!-- 4 Wheeler -->
+    <option value="10000">Ceramic Coating (4W) - 10000</option>
+    <option value="13000">Graphene Coating (4W) - 13000</option>
+    <option value="15000">Graphene Premium (4W) - 15000</option>
+    <option value="7000">Polishing (4W) - 7000</option>
+
+    <!-- Puncture -->
     <option value="100">Puncture Simple - 100</option>
     <option value="300">Puncture Major - 300</option>
-    <option value="600">Car Polishing 2W - 600</option>
-    <option value="5999">Car Polishing 4W - 5999</option>
-    <option value="2000">Ceramic Coating 2W - 2000</option>
-    <option value="10000">Ceramic Coating 4W - 10000</option>
-    <option value="3000">Graphene Coating 2W - 3000</option>
-    <option value="29999">Graphene Coating 4W - 29999</option>
-    <option value="3500">Brophine Coating 2W - 3500</option>
-    <option value="14999">Brophine Coating 4W - 14999</option>
-    <option value="other">Other</option>
+
   </select>
+  <div id="otherBox" style="display:none;">
+
+    Service Name:
+    <input type="text" id="otherName" placeholder="Enter Service Name">
+
+    Price:
+    <input type="number" id="otherPrice" placeholder="Enter Price">
+
+  </div>
+
+
 
   Custom Service Name:
   <input type="text" id="customName" style="display:none;">
@@ -130,10 +153,17 @@
   <input type="number" id="price" readonly>
 
   <button onclick="addItem()">Add Item</button>
+  <button onclick="clearAll()">Clear All</button>
 
   <table>
     <thead>
-    <tr><th>Service</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+    <tr>
+      <th>Service</th>
+      <th>Qty</th>
+      <th>Price</th>
+      <th>Total</th>
+      <th>Action</th>
+    </tr>
     </thead>
     <tbody id="items"></tbody>
   </table>
@@ -146,172 +176,191 @@
   <h3>Scan & Pay</h3>
   <div id="qrcode"></div>
 
-  <button class="save" onclick="saveInvoice()">Save & Download Invoice</button>
+  <p style="text-align:center;margin-top:30px;">
+    <b>Thank You for Swarajya Carcare</b>
+  </p>
+
+  <button class="save" onclick="downloadPDF()">Save & Download Invoice</button>
   <button class="print" onclick="window.print()">Print</button>
 
 </div>
 
 <script>
 
-  let subtotal=0;
 
-  /* SERIAL INVOICE */
+let subtotal = 0;
+
+/* ENTER KEY LOGIN */
+document.addEventListener("keydown", function(e){
+    if(e.key === "Enter" && document.getElementById("loginPage").style.display !== "none"){
+        login();
+    }
+});
+
+  /* INVOICE NUMBER */
   function generateInvoiceNumber(){
-    let last = parseInt(localStorage.getItem("invoiceSerial")) || 0;
+      let last = parseInt(localStorage.getItem("invoiceSerial")) || 0;
+      let next = last + 1;
+      localStorage.setItem("invoiceSerial", next);
+      return "INV" + String(next).padStart(4,"0");
+  }
 
-    // 🔥 Double increment
-    let next = last + 2;
+  /* LOGIN */
+  function login(){
 
-    localStorage.setItem("invoiceSerial", next);
+    let user = document.getElementById("username").value.trim();
+    let pass = document.getElementById("password").value.trim();
 
-    return "INV" + String(next).padStart(4, "0");
+    if(user === "admin" && pass === "1234"){
+
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("billingPage").style.display = "block";
+
+        document.getElementById("invoiceNo").innerText = generateInvoiceNumber();
+        document.getElementById("date").innerText = new Date().toLocaleString();
+
+    }else{
+        alert("Invalid Username or Password");
+    }
 }
 
-  function login(){
-  if(username.value==="admin" && password.value==="1234"){
-  loginPage.style.display="none";
-  billingPage.style.display="block";
-  invoiceNo.innerText=generateInvoiceNumber();
-  date.innerText=new Date().toLocaleString();
-  }else{
-  alert("Invalid Login");
-  }
+  /* DELETE ITEM */
+  function deleteItem(btn,total){
+      subtotal -= total;
+      btn.parentElement.parentElement.remove();
+      updateTotal();
   }
 
-  /* ENTER KEY LOGIN */
-  document.addEventListener("keydown", function(e){
-  if(e.key==="Enter" && loginPage.style.display!=="none"){
-  login();
+  /* EDIT ITEM */
+  function editItem(btn){
+      let row = btn.parentElement.parentElement;
+      let cols = row.querySelectorAll("td");
+
+      document.getElementById("qty").value = cols[1].innerText;
+      document.getElementById("price").value = cols[2].innerText;
+
+      subtotal -= parseFloat(cols[3].innerText);
+      row.remove();
+      updateTotal();
   }
-  });
+
+  /* CLEAR ALL */
+  function clearAll(){
+      document.getElementById("items").innerHTML="";
+      subtotal=0;
+      updateTotal();
+  }
+
+  /* ADD ITEM */
+  function addItem(){
+
+      let serviceSelect = document.getElementById("service");
+      let selectedValue = serviceSelect.value;
+
+      let serviceName;
+      let price;
+
+      if(selectedValue === "other"){
+          serviceName = document.getElementById("otherName").value;
+          price = parseFloat(document.getElementById("otherPrice").value);
+      }else{
+          serviceName = serviceSelect.options[serviceSelect.selectedIndex].text;
+          price = parseFloat(selectedValue);
+      }
+
+      let quantity = parseFloat(document.getElementById("qty").value);
+
+      if(!serviceName || isNaN(price) || isNaN(quantity)){
+          alert("Enter valid details");
+          return;
+      }
+
+      let total = price * quantity;
+      subtotal += total;
+
+      let row = document.createElement("tr");
+      row.innerHTML = `
+          <td>${serviceName}</td>
+          <td>${quantity}</td>
+          <td>${price}</td>
+          <td>${total.toFixed(2)}</td>
+          <td>
+              <button onclick="editItem(this)">Edit</button>
+              <button onclick="deleteItem(this, ${total})">Delete</button>
+          </td>
+      `;
+
+      document.getElementById("items").appendChild(row);
+
+      updateTotal();
+  }
+
+  /* UPDATE TOTAL */
+  function updateTotal(){
+      let discountValue = parseFloat(document.getElementById("discount").value) || 0;
+      let grand = subtotal - (subtotal*(discountValue/100));
+
+      document.getElementById("grand").innerText = grand.toFixed(2);
+      generateQR(grand);
+  }
+
+  /* QR GENERATE */
+  function generateQR(amount){
+      let upiURL=`upi://pay?pa=8983521107@okbizaxis&pn=SWARAJYA CARCARE&am=${amount}&cu=INR`;
+      document.getElementById("qrcode").innerHTML="";
+      new QRCode(document.getElementById("qrcode"),{
+          text:upiURL,
+          width:120,
+          height:120
+      });
+  }
+
+  /* PDF DOWNLOAD */
+  function downloadPDF(){
+
+      const { jsPDF } = window.jspdf;
+
+      html2canvas(document.getElementById("billingPage"),{
+          scale:3,
+          useCORS:true
+      }).then(canvas=>{
+
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF("p","mm","a4");
+
+          const imgWidth = 210;
+          const imgHeight = canvas.height * imgWidth / canvas.width;
+
+          pdf.addImage(imgData,"PNG",0,0,imgWidth,imgHeight);
+          pdf.save("Invoice_"+document.getElementById("invoiceNo").innerText+".pdf");
+
+      });
+  }
+
+  /* OTHER SERVICE BOX SHOW/HIDE */
+  function handleServiceChange(){
+      let selected = document.getElementById("service").value;
+
+      if(selected === "other"){
+          document.getElementById("otherBox").style.display="block";
+      }else{
+          document.getElementById("otherBox").style.display="none";
+      }
+  }
 
   function setPrice(){
-  let value=service.value;
-  if(value==="other"){
-  customName.style.display="block";
-  price.readOnly=false;
-  price.value="";
-  }else{
-  customName.style.display="none";
-  price.readOnly=true;
-  price.value=value;
-  }
-  }
 
-  function addItem(){
-  let value=service.value;
-  let name=value==="other"?customName.value:service.options[service.selectedIndex].text;
-  let qty=parseFloat(document.getElementById("qty").value);
-  let priceValue=parseFloat(document.getElementById("price").value);
+let serviceSelect = document.getElementById("service");
+let selectedValue = serviceSelect.value;
 
-  if(name===""||isNaN(qty)||isNaN(priceValue)){
-  alert("Enter valid details");
-  return;
-  }
+if(selectedValue !== "other" && selectedValue !== ""){
+    document.getElementById("price").value = selectedValue;
+}else{
+    document.getElementById("price").value = "";
+}
 
-  let total=qty*priceValue;
-  subtotal+=total;
-
-  items.innerHTML+=`<tr>
-  <td>${name}</td>
-  <td>${qty}</td>
-  <td>${priceValue}</td>
-  <td>${total.toFixed(2)}</td>
-  </tr>`;
-
-  updateTotal();
-  customName.value="";
-  }
-
-  function updateTotal(){
-  let discountValue=parseFloat(document.getElementById("discount").value)||0;
-  let grand=subtotal-(subtotal*(discountValue/100));
-  document.getElementById("grand").innerText=grand.toFixed(2);
-  generateQR(grand);
-  }
-
-  function generateQR(amount){
-  let upiURL=`upi://pay?pa=7558382756@fam&pn=SWARAJYA CARCARE&am=${amount}&cu=INR`;
-  qrcode.innerHTML="";
-  new QRCode(qrcode,{text:upiURL,width:120,height:120});
-  }
-
-  function saveInvoice(){
-
-  const { jsPDF } = window.jspdf;
-  let doc=new jsPDF();
-
-  let invoiceNumber=invoiceNo.innerText;
-  let invoiceDate=date.innerText;
-  let customerName=customer.value||"Walk-in Customer";
-  let discountValue=parseFloat(discount.value)||0;
-  let grandTotal=grand.innerText;
-
-  let logo=new Image();
-  logo.src="logo.png";
-
-  logo.onload=function(){
-
-  let imgWidth=logo.width;
-  let imgHeight=logo.height;
-  let ratio=imgHeight/imgWidth;
-
-  let pdfWidth=80;
-  let pdfHeight=pdfWidth*ratio;
-
-  let pageWidth=doc.internal.pageSize.getWidth();
-  let centerX=(pageWidth-pdfWidth)/2;
-
-  doc.addImage(logo,"PNG",centerX,10,pdfWidth,pdfHeight);
-
-  doc.setFontSize(18);
-  doc.text("SWARAJYA CARCARE",pageWidth/2,pdfHeight+25,{align:"center"});
-
-  doc.setFontSize(12);
-  doc.text("Invoice No: "+invoiceNumber,20,pdfHeight+40);
-  doc.text("Date: "+invoiceDate,20,pdfHeight+48);
-  doc.text("Customer: "+customerName,20,pdfHeight+56);
-
-  doc.line(20,pdfHeight+62,190,pdfHeight+62);
-
-  let y=pdfHeight+72;
-
-  doc.text("Service",20,y);
-  doc.text("Qty",100,y);
-  doc.text("Price",120,y);
-  doc.text("Total",160,y);
-
-  doc.line(20,y+2,190,y+2);
-  y+=10;
-
-  let rows=document.querySelectorAll("#items tr");
-  rows.forEach(row=>{
-  let cols=row.querySelectorAll("td");
-  doc.text(cols[0].innerText,20,y);
-  doc.text(cols[1].innerText,100,y);
-  doc.text(cols[2].innerText,120,y);
-  doc.text(cols[3].innerText,160,y);
-  y+=8;
-  });
-
-  y+=5;
-  doc.line(20,y,190,y);
-  y+=10;
-
-  doc.text("Discount: "+discountValue+"%",120,y);
-  y+=8;
-
-  doc.setFontSize(14);
-  doc.text("Grand Total: ₹"+grandTotal,120,y);
-
-  doc.save("Invoice_"+invoiceNumber+".pdf");
-
-  };
-
-  }
-
+}
 </script>
 
 </body>
-
 </html>
