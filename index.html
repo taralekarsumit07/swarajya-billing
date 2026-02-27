@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SWARAJYA CARCARE - Professional Billing</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,10 +14,11 @@
     body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f4f7f6; color: #333; }
 
     .container {
-        width: 790px;
+        max-width: 790px;
+        width: 95%;
         margin: 20px auto;
         background: white;
-        padding: 30px;
+        padding: 20px;
         border-radius: 4px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         box-sizing: border-box;
@@ -33,69 +35,73 @@
 
     .logo-img { width: 180px; display: block; margin-bottom: 10px; }
 
-    input, select, button { padding: 10px; margin: 5px 0; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
+    input, select, button { padding: 12px; margin: 5px 0; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; font-size: 16px; }
     button { cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
     .btn-login { background: var(--primary); color: white; width: 100%; }
     .btn-add { background: var(--accent); color: white; width: 100%; }
 
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; table-layout: fixed; }
-    th, td { border-bottom: 1px solid var(--border); padding: 12px 8px; text-align: left; word-wrap: break-word; }
+    .table-responsive { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; min-width: 600px; }
+    th, td { border-bottom: 1px solid var(--border); padding: 12px 8px; text-align: left; }
     th { background: #f9f9f9; }
 
-    .totals-area { float: right; width: 300px; text-align: right; }
+    .totals-area { float: right; width: 100%; max-width: 300px; text-align: right; margin-top: 20px; }
     .grand-total { font-size: 1.4em; color: var(--primary); border-top: 2px solid #333; padding-top: 5px; }
+
+    /* MOBILE VIEW FIXES */
+    @media (max-width: 600px) {
+        .invoice-header { flex-direction: column; text-align: left; }
+        .invoice-header div { text-align: left !important; margin-bottom: 10px; }
+        .control-grid { grid-template-columns: 1fr !important; }
+        .btn-flex { flex-direction: column; }
+        .btn-flex button { width: 100% !important; }
+    }
 
     @media print {
         #control-panel, .action-col, #discInput, button, #discount-control { display: none !important; }
-        .container { margin: 0; box-shadow: none; width: 100%; padding: 10px; }
+        .container { margin: 0; box-shadow: none; width: 100%; padding: 10px; max-width: 100%; }
         body { background: white; }
     }
   </style>
 </head>
 <body>
 
-<div class="container" id="loginPage" style="text-align:center; padding: 100px 30px;">
+<div class="container" id="loginPage" style="text-align:center; padding: 60px 20px;">
   <h2 style="margin-bottom: 20px;">SWARAJYA CARCARE</h2>
   <div style="max-width:300px; margin:auto;">
     <input type="text" id="username" placeholder="Username" style="width:100%">
     <input type="password" id="password" placeholder="Password" style="width:100%">
     <button class="btn-login" onclick="handleLogin()">LOGIN</button>
-    <p style="font-size: 11px; color: #888; margin-top: 10px;">Enter Username & Password, then press Enter</p>
   </div>
 </div>
 
 <div class="container" id="billingPage" style="display:none;">
 
   <div class="invoice-header">
-    <div id="addressSide">
+    <div>
       <img src="logo.png" class="logo-img" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <h2 style="display:none; color:var(--primary); margin:0 0 10px 0;">SWARAJYA CARCARE</h2>
-      <div style="font-size: 13px; line-height: 1.4;">
-        <b>Address:</b> Karad-Vita Road,<br>
-        Near Mahalaxmi Temple, Kadegaon<br>
+      <div style="font-size: 13px;">
+        <b>Address:</b> Karad-Vita Road, Kadegaon<br>
         <b>Mobile: 8983521107</b>
       </div>
     </div>
 
     <div style="text-align:right;">
-      <h1 style="margin:0; font-size: 28px; color: var(--primary); letter-spacing: 1px;">INVOICE</h1>
-      <div style="margin-top: 10px; font-size: 14px;">
-        <p style="margin:2px 0;"><b>Invoice No:</b> <span id="invNoDisplay"></span></p>
-        <p style="margin:2px 0;"><b>Date:</b> <span id="dateDisplay"></span></p>
-      </div>
+      <h1 style="margin:0; font-size: 24px; color: var(--primary);">INVOICE</h1>
+      <p style="margin:2px 0;">No: <span id="invNoDisplay"></span></p>
+      <p style="margin:2px 0;">Date: <span id="dateDisplay"></span></p>
     </div>
   </div>
 
-  <div style="display: flex; justify-content: flex-start; margin-bottom: 20px;">
-    <div style="text-align: left; border-left: 3px solid var(--accent); padding-left: 15px;">
-      <b style="color: var(--primary); text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Billed To:</b><br>
-      <span id="custNameDisplay" style="font-size: 18px; font-weight: bold; color: #000;">Walk-in Customer</span><br>
-      <span id="custMobDisplay" style="color: #555;">-</span>
-    </div>
+  <div style="margin-bottom: 20px; border-left: 3px solid var(--accent); padding-left: 15px;">
+    <b style="font-size: 12px; color: #666;">BILLED TO:</b><br>
+    <span id="custNameDisplay" style="font-size: 18px; font-weight: bold;">Walk-in Customer</span><br>
+    <span id="custMobDisplay">-</span>
   </div>
 
-  <div id="control-panel" style="background: #f1f3f5; padding: 20px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e9ecef;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+  <div id="control-panel" style="background: #f1f3f5; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+    <div class="control-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
       <input type="text" id="custName" placeholder="Customer Name" oninput="syncData()">
       <input type="tel" id="custMob" placeholder="Mobile Number" oninput="syncData()">
     </div>
@@ -128,37 +134,39 @@
       <input type="number" id="itemPrice" placeholder="Price (₹)">
       <button class="btn-add" onclick="addItem()">ADD ITEM</button>
     </div>
-    <input type="text" id="otherServiceName" placeholder="Enter Custom Service Name" style="display:none; width: 100%; margin-top: 5px;">
+    <input type="text" id="otherServiceName" placeholder="Enter Service Name" style="display:none; width: 100%; margin-top: 5px;">
   </div>
 
-  <table>
-    <thead>
-    <tr>
-      <th style="width: 50%;">Service Description</th>
-      <th style="width: 10%;">Qty</th>
-      <th style="width: 15%;">Price</th>
-      <th style="width: 15%;">Total</th>
-      <th class="action-col" style="width: 10%;">Action</th>
-    </tr>
-    </thead>
-    <tbody id="billItems"></tbody>
-  </table>
+  <div class="table-responsive">
+    <table>
+      <thead>
+      <tr>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+        <th class="action-col">X</th>
+      </tr>
+      </thead>
+      <tbody id="billItems"></tbody>
+    </table>
+  </div>
 
   <div class="totals-area">
     <p>Subtotal: ₹<span id="subtotal">0.00</span></p>
     <div id="discount-control">
-      Disc (%): <input type="number" id="discInput" value="0" oninput="calculateTotal()" style="width: 60px; padding: 2px;">
+      Disc (%): <input type="number" id="discInput" value="0" oninput="calculateTotal()" style="width: 70px;">
     </div>
     <p>Discount: -₹<span id="discAmt">0.00</span></p>
-    <div class="grand-total"><b>Total Amount: ₹<span id="grandTotal">0.00</span></b></div>
-    <div id="qrcode" style="margin-top: 15px;"></div>
+    <div class="grand-total"><b>Total: ₹<span id="grandTotal">0.00</span></b></div>
+    <div id="qrcode" style="margin-top: 15px; display: inline-block;"></div>
   </div>
 
-  <div style="clear: both; text-align: center; padding-top: 50px;">
-    <p style="font-weight: bold; color: #333;">Thank You For Visiting Swarajya Carcares</p>
-    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
-      <button onclick="savePDF()" style="background:#27ae60; color:white; padding: 10px 30px; border-radius: 4px;">Download PDF</button>
-      <button onclick="window.print()" style="background:var(--primary); color:white; padding: 10px 30px; border-radius: 4px;">Print Invoice</button>
+  <div style="clear: both; text-align: center; padding-top: 40px;">
+    <p style="font-weight: bold;">Thank You For Visiting Swarajya Carcare</p>
+    <div class="btn-flex" style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+      <button onclick="savePDF()" style="background:#27ae60; color:white; padding: 12px 25px; flex: 1;">PDF</button>
+      <button onclick="window.print()" style="background:var(--primary); color:white; padding: 12px 25px; flex: 1;">Print</button>
     </div>
   </div>
 </div>
@@ -166,11 +174,8 @@
 <script>
   let totalRaw = 0;
 
-  // Global Enter Key Listener for Login
-  document.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') {
-      handleLogin();
-    }
+  document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') handleLogin();
   });
 
   function handleLogin() {
@@ -179,14 +184,11 @@
     if(u === "admin" && p === "1234") {
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('billingPage').style.display = 'block';
-
-      let lastSerial = localStorage.getItem('invoiceSerial') || 1000;
-      let nextSerial = parseInt(lastSerial) + 1;
+      let nextSerial = parseInt(localStorage.getItem('invoiceSerial') || 1000) + 1;
       localStorage.setItem('invoiceSerial', nextSerial);
-
       document.getElementById('invNoDisplay').innerText = "SWJ-" + nextSerial;
       document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-GB');
-    } else { alert("Login Failed: Check Username/Password"); }
+    } else { alert("Error!"); }
   }
 
   function syncData() {
@@ -195,8 +197,7 @@
   }
 
   function checkOther() {
-    const s = document.getElementById('serviceSelect').value;
-    document.getElementById('otherServiceName').style.display = (s === 'other') ? 'block' : 'none';
+    document.getElementById('otherServiceName').style.display = (document.getElementById('serviceSelect').value === 'other') ? 'block' : 'none';
   }
 
   function addItem() {
@@ -204,36 +205,22 @@
     const name = (sel === 'other') ? document.getElementById('otherServiceName').value : sel;
     const qty = parseFloat(document.getElementById('itemQty').value);
     const price = parseFloat(document.getElementById('itemPrice').value);
-
-    if(!name || isNaN(price)) return alert("Please select a service and enter price");
-
+    if(!name || isNaN(price)) return;
     const lineTotal = qty * price;
     totalRaw += lineTotal;
-
     const row = document.getElementById('billItems').insertRow();
-    row.innerHTML = `
-      <td>${name}</td>
-      <td>${qty}</td>
-      <td>${price.toFixed(2)}</td>
-      <td>${lineTotal.toFixed(2)}</td>
-      <td class="action-col"><button onclick="removeRow(this, ${lineTotal})" style="background:#e74c3c; color:white; padding: 2px 8px; border-radius: 3px;">Delete</button></td>
-    `;
+    row.innerHTML = `<td>${name}</td><td>${qty}</td><td>${price.toFixed(2)}</td><td>${lineTotal.toFixed(2)}</td><td class="action-col"><button onclick="removeRow(this, ${lineTotal})" style="background:#e74c3c; color:white; padding: 5px 10px;">X</button></td>`;
     calculateTotal();
     document.getElementById('itemPrice').value = "";
   }
 
-  function removeRow(btn, amt) {
-    totalRaw -= amt;
-    btn.parentElement.parentElement.remove();
-    calculateTotal();
-  }
+  function removeRow(btn, amt) { totalRaw -= amt; btn.parentElement.parentElement.remove(); calculateTotal(); }
 
   function calculateTotal() {
-    const discPer = parseFloat(document.getElementById('discInput').value) || 0;
-    const discAmt = totalRaw * (discPer / 100);
-    const grand = totalRaw - discAmt;
+    const dAmt = totalRaw * ((parseFloat(document.getElementById('discInput').value) || 0) / 100);
+    const grand = totalRaw - dAmt;
     document.getElementById('subtotal').innerText = totalRaw.toFixed(2);
-    document.getElementById('discAmt').innerText = discAmt.toFixed(2);
+    document.getElementById('discAmt').innerText = dAmt.toFixed(2);
     document.getElementById('grandTotal').innerText = grand.toFixed(2);
     updateQR(grand.toFixed(2));
   }
@@ -250,7 +237,7 @@
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
-      pdf.save("Invoice_Swarajya.pdf");
+      pdf.save("Invoice.pdf");
     });
   }
 </script>
