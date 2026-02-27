@@ -1,408 +1,258 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SWARAJYA CARCARE Billing</title>
+  <title>SWARAJYA CARCARE - Professional Billing</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
-    /* ===== MOBILE VIEW ===== */
-@media (max-width: 768px){
+    :root { --primary: #1a2a3a; --accent: #2196F3; --border: #e0e0e0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f4f7f6; color: #333; }
 
-.container{
-    width:95%;
-    padding:10px;
-}
-
-.logo{
-    width:120px;
-}
-
-table{
-    font-size:12px;
-}
-
-th,td{
-    padding:4px;
-}
-
-button{
-    font-size:14px;
-}
-
-}
-
-/* ===== DESKTOP VIEW ===== */
-@media (min-width: 769px){
-
-.container{
-    max-width:900px;
-}
-
-.logo{
-    width:200px;
-}
-
-}
-    body{
-        font-family:Arial;
-        margin:0;
-        background:#f2f2f2;
+    .container {
+        width: 790px;
+        margin: 20px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
     }
-    .container{
-        max-width:900px;
-        margin:auto;
-        background:white;
-        padding:20px;
-        border-radius:10px;
-        box-shadow:0 0 10px rgba(0,0,0,0.2);
-        margin-top:20px;
-    }
-    .logo{
-        width:200px;
-        display:block;
-        margin:0 auto 15px auto;
-    }
-    input,select,button{
-        padding:8px;
-        margin:5px 0;
-        width:100%;
-    }
-    button{
-        border:none;
-        border-radius:5px;
-        font-weight:bold;
-        cursor:pointer;
-    }
-    .loginBtn{background:#ff9800;color:white;}
-    .save{background:#4CAF50;color:white;}
-    .print{background:#2196F3;color:white;}
 
-    table{
-        width:100%;
-        border-collapse:collapse;
-        margin-top:10px;
+    .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid var(--primary);
+        padding-bottom: 15px;
+        margin-bottom: 20px;
     }
-    th,td{
-        border:1px solid #ddd;
-        padding:6px;
-        text-align:center;
-    }
-    th{background:#f5f5f5;}
 
-    @media print{
-    button,input,select{display:none;}
+    .logo-img { width: 180px; display: block; margin-bottom: 10px; }
+
+    input, select, button { padding: 10px; margin: 5px 0; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
+    button { cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
+    .btn-login { background: var(--primary); color: white; width: 100%; }
+    .btn-add { background: var(--accent); color: white; width: 100%; }
+
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; table-layout: fixed; }
+    th, td { border-bottom: 1px solid var(--border); padding: 12px 8px; text-align: left; word-wrap: break-word; }
+    th { background: #f9f9f9; }
+
+    .totals-area { float: right; width: 300px; text-align: right; }
+    .grand-total { font-size: 1.4em; color: var(--primary); border-top: 2px solid #333; padding-top: 5px; }
+
+    @media print {
+        #control-panel, .action-col, #discInput, button, #discount-control { display: none !important; }
+        .container { margin: 0; box-shadow: none; width: 100%; padding: 10px; }
+        body { background: white; }
     }
   </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div class="container" id="loginPage">
-  <img src="logo.png" class="logo">
-  <h2 style="text-align:center;">SWARAJYA CARCARE</h2>
-  <h3>Login</h3>
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
-  <button class="loginBtn" onclick="login()">Login</button>
+<div class="container" id="loginPage" style="text-align:center; padding: 100px 30px;">
+  <h2 style="margin-bottom: 20px;">SWARAJYA CARCARE</h2>
+  <div style="max-width:300px; margin:auto;">
+    <input type="text" id="username" placeholder="Username" style="width:100%">
+    <input type="password" id="password" placeholder="Password" style="width:100%">
+    <button class="btn-login" onclick="handleLogin()">LOGIN</button>
+    <p style="font-size: 11px; color: #888; margin-top: 10px;">Enter Username & Password, then press Enter</p>
+  </div>
 </div>
 
-<!-- BILLING -->
 <div class="container" id="billingPage" style="display:none;">
 
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-
-    <img src="logo.png" style="height:180px;">
-
-    <div style="text-align:right;">
-      <b style="font-size:20px;">SWARAJYA CARCARE</b><br>
-      स्वराज्य कारकेअर, कराड-विटा रोड, <br>
-      महालक्ष्मी मंदिरा शेजारी, कडेगांव<br>
-      Mo: 8983521107
+  <div class="invoice-header">
+    <div id="addressSide">
+      <img src="logo.png" class="logo-img" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <h2 style="display:none; color:var(--primary); margin:0 0 10px 0;">SWARAJYA CARCARE</h2>
+      <div style="font-size: 13px; line-height: 1.4;">
+        <b>Address:</b> Karad-Vita Road,<br>
+        Near Mahalaxmi Temple, Kadegaon<br>
+        <b>Mobile: 8983521107</b>
+      </div>
     </div>
 
-  </div>
-  <hr>
-
-  <p><b>Invoice No:</b> <span id="invoiceNo"></span></p>
-  <p><b>Date:</b> <span id="date"></span></p>
-
-  Customer:
-  <input type="text" id="customer">
-
-  Service:
-  <select id="service" onchange="setPrice()">
-
-    <option value="">-- Select Service --</option>
-
-    <!-- Basic Services -->
-    <option value="30">Tyre Balancing - 30</option>
-    <option value="0">Car Outside Washing</option>
-    <option value="0">Bike Wash</option>
-
-    <!-- Car Cleaning -->
-    <option value="30">8D Cleaning - 30</option>
-    <option value="2200">Internal Cleaning - 2200</option>
-    <option value="2000">External Cleaning - 2000</option>
-    <option value="0">Engine Cleaning</option>
-    <option value="2000">Glass Treatment - 2000</option>
-    <option value="400">Water Spot Removal - 400</option>
-
-    <!-- 2 Wheeler -->
-    <option value="2000">Ceramic Coating (2W) - 2000</option>
-    <option value="3000">Graphene Coating (2W) - 3000</option>
-    <option value="3500">Graphene Premium (2W) - 3500</option>
-    <option value="800">Polishing (2W) - 800</option>
-
-    <!-- 4 Wheeler -->
-    <option value="10000">Ceramic Coating (4W) - 10000</option>
-    <option value="13000">Graphene Coating (4W) - 13000</option>
-    <option value="15000">Graphene Premium (4W) - 15000</option>
-    <option value="7000">Polishing (4W) - 7000</option>
-
-    <!-- Puncture -->
-    <option value="100">Puncture Simple - 100</option>
-    <option value="300">Puncture Major - 300</option>
-
-  </select>
-  <div id="otherBox" style="display:none;">
-
-    Service Name:
-    <input type="text" id="otherName" placeholder="Enter Service Name">
-
-    Price:
-    <input type="number" id="otherPrice" placeholder="Enter Price">
-
+    <div style="text-align:right;">
+      <h1 style="margin:0; font-size: 28px; color: var(--primary); letter-spacing: 1px;">INVOICE</h1>
+      <div style="margin-top: 10px; font-size: 14px;">
+        <p style="margin:2px 0;"><b>Invoice No:</b> <span id="invNoDisplay"></span></p>
+        <p style="margin:2px 0;"><b>Date:</b> <span id="dateDisplay"></span></p>
+      </div>
+    </div>
   </div>
 
+  <div style="display: flex; justify-content: flex-start; margin-bottom: 20px;">
+    <div style="text-align: left; border-left: 3px solid var(--accent); padding-left: 15px;">
+      <b style="color: var(--primary); text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Billed To:</b><br>
+      <span id="custNameDisplay" style="font-size: 18px; font-weight: bold; color: #000;">Walk-in Customer</span><br>
+      <span id="custMobDisplay" style="color: #555;">-</span>
+    </div>
+  </div>
 
+  <div id="control-panel" style="background: #f1f3f5; padding: 20px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+      <input type="text" id="custName" placeholder="Customer Name" oninput="syncData()">
+      <input type="tel" id="custMob" placeholder="Mobile Number" oninput="syncData()">
+    </div>
 
-  Custom Service Name:
-  <input type="text" id="customName" style="display:none;">
-
-  Qty:
-  <input type="number" id="qty" value="1">
-
-  Price:
-  <input type="number" id="price" readonly>
-
-  <button onclick="addItem()">Add Item</button>
-  <button onclick="clearAll()">Clear All</button>
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;">
+      <select id="serviceSelect" onchange="checkOther()">
+        <option value="">-- Select Service --</option>
+        <option value="Tyre Balancing">Tyre Balancing</option>
+        <option value="Car Outside Washing">Car Outside Washing</option>
+        <option value="Bike Wash">Bike Wash</option>
+        <option value="8D Cleaning">8D Cleaning</option>
+        <option value="Internal Cleaning">Internal Cleaning</option>
+        <option value="External Cleaning">External Cleaning</option>
+        <option value="Engine Cleaning">Engine Cleaning</option>
+        <option value="Glass Treatment">Glass Treatment</option>
+        <option value="Water Spot Removal">Water Spot Removal</option>
+        <option value="Ceramic Coating (2W)">Ceramic Coating (2W)</option>
+        <option value="Graphene Coating (2W)">Graphene Coating (2W)</option>
+        <option value="Graphene Premium (2W)">Graphene Premium (2W)</option>
+        <option value="Polishing (2W)">Polishing (2W)</option>
+        <option value="Ceramic Coating (4W)">Ceramic Coating (4W)</option>
+        <option value="Graphene Coating (4W)">Graphene Coating (4W)</option>
+        <option value="Graphene Premium (4W)">Graphene Premium (4W)</option>
+        <option value="Polishing (4W)">Polishing (4W)</option>
+        <option value="Puncture Simple">Puncture Simple</option>
+        <option value="Puncture Major">Puncture Major</option>
+        <option value="other">Other Service...</option>
+      </select>
+      <input type="number" id="itemQty" value="1" title="Quantity">
+      <input type="number" id="itemPrice" placeholder="Price (₹)">
+      <button class="btn-add" onclick="addItem()">ADD ITEM</button>
+    </div>
+    <input type="text" id="otherServiceName" placeholder="Enter Custom Service Name" style="display:none; width: 100%; margin-top: 5px;">
+  </div>
 
   <table>
     <thead>
     <tr>
-      <th>Service</th>
-      <th>Qty</th>
-      <th>Price</th>
-      <th>Total</th>
-      <th>Action</th>
+      <th style="width: 50%;">Service Description</th>
+      <th style="width: 10%;">Qty</th>
+      <th style="width: 15%;">Price</th>
+      <th style="width: 15%;">Total</th>
+      <th class="action-col" style="width: 10%;">Action</th>
     </tr>
     </thead>
-    <tbody id="items"></tbody>
+    <tbody id="billItems"></tbody>
   </table>
 
-  Discount (%):
-  <input type="number" id="discount" value="0" oninput="updateTotal()">
+  <div class="totals-area">
+    <p>Subtotal: ₹<span id="subtotal">0.00</span></p>
+    <div id="discount-control">
+      Disc (%): <input type="number" id="discInput" value="0" oninput="calculateTotal()" style="width: 60px; padding: 2px;">
+    </div>
+    <p>Discount: -₹<span id="discAmt">0.00</span></p>
+    <div class="grand-total"><b>Total Amount: ₹<span id="grandTotal">0.00</span></b></div>
+    <div id="qrcode" style="margin-top: 15px;"></div>
+  </div>
 
-  <h3>Grand Total: ₹<span id="grand">0</span></h3>
-
-  <h3>Scan & Pay</h3>
-  <div id="qrcode"></div>
-
-  <p style="text-align:center;margin-top:30px;">
-    <b>Thank You for Swarajya Carcare</b>
-  </p>
-
-  <button class="save" onclick="downloadPDF()">Save & Download Invoice</button>
-  <button class="print" onclick="window.print()">Print</button>
-
+  <div style="clear: both; text-align: center; padding-top: 50px;">
+    <p style="font-weight: bold; color: #333;">Thank You For Visiting Swarajya Carcares</p>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+      <button onclick="savePDF()" style="background:#27ae60; color:white; padding: 10px 30px; border-radius: 4px;">Download PDF</button>
+      <button onclick="window.print()" style="background:var(--primary); color:white; padding: 10px 30px; border-radius: 4px;">Print Invoice</button>
+    </div>
+  </div>
 </div>
 
 <script>
+  let totalRaw = 0;
 
- 
-  let subtotal = 0;
-
-  /* ENTER KEY LOGIN */
-  document.addEventListener("keydown", function(e){
-      if(e.key === "Enter" && document.getElementById("loginPage").style.display !== "none"){
-          login();
-      }
+  // Global Enter Key Listener for Login
+  document.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') {
+      handleLogin();
+    }
   });
 
-    /* INVOICE NUMBER */
-    function generateInvoiceNumber(){
-        let last = parseInt(localStorage.getItem("invoiceSerial")) || 0;
-        let next = last + 1;
-        localStorage.setItem("invoiceSerial", next);
-        return "INV" + String(next).padStart(4,"0");
-    }
+  function handleLogin() {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    if(u === "admin" && p === "1234") {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('billingPage').style.display = 'block';
 
-    /* LOGIN */
-    function login(){
+      let lastSerial = localStorage.getItem('invoiceSerial') || 1000;
+      let nextSerial = parseInt(lastSerial) + 1;
+      localStorage.setItem('invoiceSerial', nextSerial);
 
-      let user = document.getElementById("username").value.trim();
-      let pass = document.getElementById("password").value.trim();
-
-      if(user === "admin" && pass === "1234"){
-
-          document.getElementById("loginPage").style.display = "none";
-          document.getElementById("billingPage").style.display = "block";
-
-          document.getElementById("invoiceNo").innerText = generateInvoiceNumber();
-          document.getElementById("date").innerText = new Date().toLocaleString();
-
-      }else{
-          alert("Invalid Username or Password");
-      }
+      document.getElementById('invNoDisplay').innerText = "SWJ-" + nextSerial;
+      document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-GB');
+    } else { alert("Login Failed: Check Username/Password"); }
   }
 
-    /* DELETE ITEM */
-    function deleteItem(btn,total){
-        subtotal -= total;
-        btn.parentElement.parentElement.remove();
-        updateTotal();
-    }
-
-    /* EDIT ITEM */
-    function editItem(btn){
-        let row = btn.parentElement.parentElement;
-        let cols = row.querySelectorAll("td");
-
-        document.getElementById("qty").value = cols[1].innerText;
-        document.getElementById("price").value = cols[2].innerText;
-
-        subtotal -= parseFloat(cols[3].innerText);
-        row.remove();
-        updateTotal();
-    }
-
-    /* CLEAR ALL */
-    function clearAll(){
-        document.getElementById("items").innerHTML="";
-        subtotal=0;
-        updateTotal();
-    }
-
-    /* ADD ITEM */
-    function addItem(){
-
-        let serviceSelect = document.getElementById("service");
-        let selectedValue = serviceSelect.value;
-
-        let serviceName;
-        let price;
-
-        if(selectedValue === "other"){
-            serviceName = document.getElementById("otherName").value;
-            price = parseFloat(document.getElementById("otherPrice").value);
-        }else{
-            serviceName = serviceSelect.options[serviceSelect.selectedIndex].text;
-            price = parseFloat(selectedValue);
-        }
-
-        let quantity = parseFloat(document.getElementById("qty").value);
-
-        if(!serviceName || isNaN(price) || isNaN(quantity)){
-            alert("Enter valid details");
-            return;
-        }
-
-        let total = price * quantity;
-        subtotal += total;
-
-        let row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${serviceName}</td>
-            <td>${quantity}</td>
-            <td>${price}</td>
-            <td>${total.toFixed(2)}</td>
-            <td>
-                <button onclick="editItem(this)">Edit</button>
-                <button onclick="deleteItem(this, ${total})">Delete</button>
-            </td>
-        `;
-
-        document.getElementById("items").appendChild(row);
-
-        updateTotal();
-    }
-
-    /* UPDATE TOTAL */
-    function updateTotal(){
-        let discountValue = parseFloat(document.getElementById("discount").value) || 0;
-        let grand = subtotal - (subtotal*(discountValue/100));
-
-        document.getElementById("grand").innerText = grand.toFixed(2);
-        generateQR(grand);
-    }
-
-    /* QR GENERATE */
-    function generateQR(amount){
-        let upiURL=`upi://pay?pa=8983521107@okbizaxis&pn=SWARAJYA CARCARE&am=${amount}&cu=INR`;
-        document.getElementById("qrcode").innerHTML="";
-        new QRCode(document.getElementById("qrcode"),{
-            text:upiURL,
-            width:120,
-            height:120
-        });
-    }
-
-    /* PDF DOWNLOAD */
-    function downloadPDF(){
-
-        const { jsPDF } = window.jspdf;
-
-        html2canvas(document.getElementById("billingPage"),{
-            scale:3,
-            useCORS:true
-        }).then(canvas=>{
-
-            const imgData = canvas.toDataURL("image/png");
-            const pdf = new jsPDF("p","mm","a4");
-
-            const imgWidth = 210;
-            const imgHeight = canvas.height * imgWidth / canvas.width;
-
-            pdf.addImage(imgData,"PNG",0,0,imgWidth,imgHeight);
-            pdf.save("Invoice_"+document.getElementById("invoiceNo").innerText+".pdf");
-
-        });
-    }
-
-    /* OTHER SERVICE BOX SHOW/HIDE */
-    function handleServiceChange(){
-        let selected = document.getElementById("service").value;
-
-        if(selected === "other"){
-            document.getElementById("otherBox").style.display="block";
-        }else{
-            document.getElementById("otherBox").style.display="none";
-        }
-    }
-
-    function setPrice(){
-
-  let serviceSelect = document.getElementById("service");
-  let selectedValue = serviceSelect.value;
-
-  if(selectedValue !== "other" && selectedValue !== ""){
-      document.getElementById("price").value = selectedValue;
-  }else{
-      document.getElementById("price").value = "";
+  function syncData() {
+    document.getElementById('custNameDisplay').innerText = document.getElementById('custName').value || "Walk-in Customer";
+    document.getElementById('custMobDisplay').innerText = document.getElementById('custMob').value || "-";
   }
 
+  function checkOther() {
+    const s = document.getElementById('serviceSelect').value;
+    document.getElementById('otherServiceName').style.display = (s === 'other') ? 'block' : 'none';
+  }
+
+  function addItem() {
+    const sel = document.getElementById('serviceSelect').value;
+    const name = (sel === 'other') ? document.getElementById('otherServiceName').value : sel;
+    const qty = parseFloat(document.getElementById('itemQty').value);
+    const price = parseFloat(document.getElementById('itemPrice').value);
+
+    if(!name || isNaN(price)) return alert("Please select a service and enter price");
+
+    const lineTotal = qty * price;
+    totalRaw += lineTotal;
+
+    const row = document.getElementById('billItems').insertRow();
+    row.innerHTML = `
+      <td>${name}</td>
+      <td>${qty}</td>
+      <td>${price.toFixed(2)}</td>
+      <td>${lineTotal.toFixed(2)}</td>
+      <td class="action-col"><button onclick="removeRow(this, ${lineTotal})" style="background:#e74c3c; color:white; padding: 2px 8px; border-radius: 3px;">Delete</button></td>
+    `;
+    calculateTotal();
+    document.getElementById('itemPrice').value = "";
+  }
+
+  function removeRow(btn, amt) {
+    totalRaw -= amt;
+    btn.parentElement.parentElement.remove();
+    calculateTotal();
+  }
+
+  function calculateTotal() {
+    const discPer = parseFloat(document.getElementById('discInput').value) || 0;
+    const discAmt = totalRaw * (discPer / 100);
+    const grand = totalRaw - discAmt;
+    document.getElementById('subtotal').innerText = totalRaw.toFixed(2);
+    document.getElementById('discAmt').innerText = discAmt.toFixed(2);
+    document.getElementById('grandTotal').innerText = grand.toFixed(2);
+    updateQR(grand.toFixed(2));
+  }
+
+  function updateQR(amt) {
+    const upi = `upi://pay?pa=8983521107@okbizaxis&pn=SWARAJYA%20CARCARE&am=${amt}&cu=INR`;
+    document.getElementById("qrcode").innerHTML = "";
+    new QRCode(document.getElementById("qrcode"), { text: upi, width: 110, height: 110 });
+  }
+
+  function savePDF() {
+    html2canvas(document.getElementById('billingPage'), { scale: 2, width: 790 }).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
+      pdf.save("Invoice_Swarajya.pdf");
+    });
   }
 </script>
-
 </body>
 </html>
-
-
