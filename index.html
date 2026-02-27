@@ -1,76 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SWARAJYA CARCARE - Professional Billing</title>
+  <title>SWARAJYA CARCARE - Billing</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
-    :root { --primary: #1a2a3a; --accent: #2196F3; --border: #e0e0e0; }
+    :root { --primary: #1a2a3a; --accent: #d32f2f; --border: #e0e0e0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f4f7f6; color: #333; }
 
     .container {
-        max-width: 790px;
+        max-width: 800px;
         width: 95%;
         margin: 20px auto;
         background: white;
-        padding: 20px;
+        padding: 30px;
         border-radius: 4px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         box-sizing: border-box;
     }
 
+    /* Header Section */
     .invoice-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        border-bottom: 2px solid var(--primary);
+        border-bottom: 3px solid var(--primary);
         padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+
+    .logo-section { flex: 1; }
+    .logo-img { max-width: 150px; height: auto; display: block; margin-bottom: 10px; }
+
+    .shop-info { flex: 2; text-align: right; }
+    .shop-info h1 { margin: 0; font-size: 28px; color: var(--primary); font-weight: 800; }
+    .shop-details { font-size: 13px; margin-top: 5px; color: #555; }
+
+    /* Invoice Info Box */
+    .bill-info-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
         margin-bottom: 20px;
     }
 
-    .logo-img { width: 180px; display: block; margin-bottom: 10px; }
-
-    input, select, button { padding: 12px; margin: 5px 0; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; font-size: 16px; }
-    button { cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
-    .btn-login { background: var(--primary); color: white; width: 100%; }
-    .btn-add { background: var(--accent); color: white; width: 100%; }
-
-    .table-responsive { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; min-width: 600px; }
-    th, td { border-bottom: 1px solid var(--border); padding: 12px 8px; text-align: left; }
-    th { background: #f9f9f9; }
-
-    .totals-area { float: right; width: 100%; max-width: 300px; text-align: right; margin-top: 20px; }
-    .grand-total { font-size: 1.4em; color: var(--primary); border-top: 2px solid #333; padding-top: 5px; }
-
-    /* MOBILE VIEW FIXES */
-    @media (max-width: 600px) {
-        .invoice-header { flex-direction: column; text-align: left; }
-        .invoice-header div { text-align: left !important; margin-bottom: 10px; }
-        .control-grid { grid-template-columns: 1fr !important; }
-        .btn-flex { flex-direction: column; }
-        .btn-flex button { width: 100% !important; }
+    .bill-meta-box {
+        background: #f9f9f9;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-align: left;
     }
+    .bill-meta-box p { margin: 3px 0; font-size: 15px; font-weight: bold; }
+    .meta-label { color: #666; font-weight: normal; margin-right: 10px; }
+
+    /* Form & Table */
+    input, select, button { padding: 12px; margin: 5px 0; border: 1px solid var(--border); border-radius: 4px; font-size: 15px; }
+    .btn-login { background: var(--primary); color: white; width: 100%; cursor: pointer; }
+    .btn-add { background: #2196F3; color: white; border: none; cursor: pointer; font-weight: bold; }
+
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border-bottom: 1px solid var(--border); padding: 12px 10px; text-align: left; }
+    th { background: #f4f4f4; color: #333; }
+
+    .totals-area { float: right; width: 100%; max-width: 280px; text-align: right; margin-top: 15px; }
+    .grand-total { font-size: 1.6em; color: var(--accent); border-top: 2px solid #333; padding-top: 5px; margin-top: 8px; }
 
     @media print {
-        #control-panel, .action-col, #discInput, button, #discount-control { display: none !important; }
-        .container { margin: 0; box-shadow: none; width: 100%; padding: 10px; max-width: 100%; }
+        #control-panel, .action-col, #discInput, button { display: none !important; }
+        .container { margin: 0; box-shadow: none; width: 100%; padding: 15px; max-width: 100%; }
         body { background: white; }
     }
   </style>
 </head>
 <body>
 
-<div class="container" id="loginPage" style="text-align:center; padding: 60px 20px;">
-  <h2 style="margin-bottom: 20px;">SWARAJYA CARCARE</h2>
+<div class="container" id="loginPage" style="text-align:center; padding: 80px 20px;">
+  <h2 style="color: var(--primary);">SWARAJYA CARCARE</h2>
   <div style="max-width:300px; margin:auto;">
-    <input type="text" id="username" placeholder="Username" style="width:100%">
-    <input type="password" id="password" placeholder="Password" style="width:100%">
+    <input type="text" id="username" placeholder="Username" style="width:100%" onkeydown="if(event.key==='Enter') handleLogin()">
+    <input type="password" id="password" placeholder="Password" style="width:100%" onkeydown="if(event.key==='Enter') handleLogin()">
     <button class="btn-login" onclick="handleLogin()">LOGIN</button>
   </div>
 </div>
@@ -78,32 +92,36 @@
 <div class="container" id="billingPage" style="display:none;">
 
   <div class="invoice-header">
-    <div>
-      <img src="logo.png" class="logo-img" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-      <h2 style="display:none; color:var(--primary); margin:0 0 10px 0;">SWARAJYA CARCARE</h2>
-      <div style="font-size: 13px;">
+    <div class="logo-section">
+      <img src="logo.png" class="logo-img" alt="Swarajya Logo" onerror="this.src='https://via.placeholder.com/150x80?text=LOGO+HERE'">
+      <div style="font-size: 12px; color: #666;">
         <b>Address:</b> Karad-Vita Road, Kadegaon<br>
-        <b>Mobile: 8983521107</b>
+        <b>Mob:</b> 8983521107
       </div>
     </div>
 
-    <div style="text-align:right;">
-      <h1 style="margin:0; font-size: 24px; color: var(--primary);">INVOICE</h1>
-      <p style="margin:2px 0;">No: <span id="invNoDisplay"></span></p>
-      <p style="margin:2px 0;">Date: <span id="dateDisplay"></span></p>
+    <div class="shop-info">
+      <h1>SWARAJYA CARCARE</h1>
     </div>
   </div>
 
-  <div style="margin-bottom: 20px; border-left: 3px solid var(--accent); padding-left: 15px;">
-    <b style="font-size: 12px; color: #666;">BILLED TO:</b><br>
-    <span id="custNameDisplay" style="font-size: 18px; font-weight: bold;">Walk-in Customer</span><br>
-    <span id="custMobDisplay">-</span>
+  <div class="bill-info-container">
+    <div style="border-left: 4px solid var(--primary); padding-left: 15px;">
+      <small style="color: #888;">BILLED TO:</small><br>
+      <span id="custNameDisplay" style="font-size: 18px; font-weight: bold;"> </span><br>
+      <span id="custMobDisplay" style="color: #555;">-</span>
+    </div>
+
+    <div class="bill-meta-box">
+      <p><span class="meta-label">Invoice No:</span> <span id="invNoDisplay" style="color:var(--accent);"></span></p>
+      <p><span class="meta-label">Date:</span> <span id="dateDisplay"></span></p>
+    </div>
   </div>
 
-  <div id="control-panel" style="background: #f1f3f5; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-    <div class="control-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+  <div id="control-panel" style="background: #f0f3f6; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
       <input type="text" id="custName" placeholder="Customer Name" oninput="syncData()">
-      <input type="tel" id="custMob" placeholder="Mobile Number" oninput="syncData()">
+      <input type="tel" id="custMob" placeholder="Mobile / Vehicle No." oninput="syncData()">
     </div>
 
     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;">
@@ -112,7 +130,7 @@
         <option value="Tyre Balancing">Tyre Balancing</option>
         <option value="Car Outside Washing">Car Outside Washing</option>
         <option value="Bike Wash">Bike Wash</option>
-        <option value="8D Cleaning">8D Cleaning</option>
+        <option value="3D Cleaning">8D Cleaning</option>
         <option value="Internal Cleaning">Internal Cleaning</option>
         <option value="External Cleaning">External Cleaning</option>
         <option value="Engine Cleaning">Engine Cleaning</option>
@@ -137,48 +155,40 @@
     <input type="text" id="otherServiceName" placeholder="Enter Service Name" style="display:none; width: 100%; margin-top: 5px;">
   </div>
 
-  <div class="table-responsive">
-    <table>
-      <thead>
-      <tr>
-        <th>Description</th>
-        <th>Qty</th>
-        <th>Price</th>
-        <th>Total</th>
-        <th class="action-col">X</th>
-      </tr>
-      </thead>
-      <tbody id="billItems"></tbody>
-    </table>
-  </div>
+  <table>
+    <thead>
+    <tr>
+      <th>Description</th>
+      <th>Qty</th>
+      <th>Price</th>
+      <th>Total</th>
+      <th class="action-col" style="width: 50px;">X</th>
+    </tr>
+    </thead>
+    <tbody id="billItems"></tbody>
+  </table>
 
   <div class="totals-area">
     <p>Subtotal: ₹<span id="subtotal">0.00</span></p>
     <div id="discount-control">
-      Disc (%): <input type="number" id="discInput" value="0" oninput="calculateTotal()" style="width: 70px;">
+      Discount (%): <input type="number" id="discInput" value="0" oninput="calculateTotal()" style="width: 60px; padding: 5px;">
     </div>
-    <p>Discount: -₹<span id="discAmt">0.00</span></p>
+    <p>Discount Amt: -₹<span id="discAmt">0.00</span></p>
     <div class="grand-total"><b>Total: ₹<span id="grandTotal">0.00</span></b></div>
     <div id="qrcode" style="margin-top: 15px; display: inline-block;"></div>
   </div>
 
   <div style="clear: both; text-align: center; padding-top: 40px;">
-    <p style="font-weight: bold;">Thank You For Visiting Swarajya Carcare</p>
-    <div class="btn-flex" style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
-      <button onclick="savePDF()" style="background:#27ae60; color:white; padding: 12px 25px; flex: 1;">PDF</button>
-      <button onclick="window.print()" style="background:var(--primary); color:white; padding: 12px 25px; flex: 1;">Print</button>
+    <p style="font-weight: bold; font-size: 16px;">Thank You For visiting Swarajya Carcares</p>
+    <div class="btn-flex" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+      <button onclick="savePDF()" style="background:#27ae60; color:white; padding: 12px 30px; border:none; border-radius:5px;">Save as PDF</button>
+      <button onclick="window.print()" style="background:var(--primary); color:white; padding: 12px 30px; border:none; border-radius:5px;">Print Invoice</button>
     </div>
   </div>
 </div>
 
 <script>
- 
-  
   let totalRaw = 0;
-
-  document.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') handleLogin();
-  });
 
   function handleLogin() {
     const u = document.getElementById('username').value;
@@ -211,15 +221,20 @@
     const lineTotal = qty * price;
     totalRaw += lineTotal;
     const row = document.getElementById('billItems').insertRow();
-    row.innerHTML = `<td>${name}</td><td>${qty}</td><td>${price.toFixed(2)}</td><td>${lineTotal.toFixed(2)}</td><td class="action-col"><button onclick="removeRow(this, ${lineTotal})" style="background:#e74c3c; color:white; padding: 5px 10px;">X</button></td>`;
+    row.innerHTML = `<td>${name}</td><td>${qty}</td><td>${price.toFixed(2)}</td><td>${lineTotal.toFixed(2)}</td><td class="action-col"><button onclick="removeRow(this, ${lineTotal})" style="background:#e74c3c; color:white; border:none; padding: 5px 10px; border-radius:3px;">X</button></td>`;
     calculateTotal();
     document.getElementById('itemPrice').value = "";
   }
 
-  function removeRow(btn, amt) { totalRaw -= amt; btn.parentElement.parentElement.remove(); calculateTotal(); }
+  function removeRow(btn, amt) {
+    totalRaw -= amt;
+    btn.parentElement.parentElement.remove();
+    calculateTotal();
+  }
 
   function calculateTotal() {
-    const dAmt = totalRaw * ((parseFloat(document.getElementById('discInput').value) || 0) / 100);
+    const disc = parseFloat(document.getElementById('discInput').value) || 0;
+    const dAmt = totalRaw * (disc / 100);
     const grand = totalRaw - dAmt;
     document.getElementById('subtotal').innerText = totalRaw.toFixed(2);
     document.getElementById('discAmt').innerText = dAmt.toFixed(2);
@@ -234,16 +249,14 @@
   }
 
   function savePDF() {
-    html2canvas(document.getElementById('billingPage'), { scale: 2, width: 790 }).then(canvas => {
+    html2canvas(document.getElementById('billingPage'), { scale: 2 }).then(canvas => {
       const imgData = canvas.toDataURL('image/png');
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
-      pdf.save("Invoice.pdf");
+      pdf.save("Swarajya_Invoice.pdf");
     });
   }
 </script>
 </body>
 </html>
-
-
