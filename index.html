@@ -128,35 +128,55 @@
       <input type="text" id="custName" placeholder="Customer Name" oninput="syncData()">
       <input type="tel" id="custMob" placeholder="Mobile / Vehicle No." oninput="syncData()">
     </div>
+<div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;">
+  <select id="serviceSelect" onchange="checkOther()">
+    <option value="">-- Select Service --</option>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;">
-      <select id="serviceSelect" onchange="checkOther()">
-        <option value="">-- Select Service --</option>
-        <option value="Tyre Balancing">Tyre Balancing</option>
-        <option value="Car Outside Washing">Car Outside Washing</option>
-        <option value="Bike Wash">Bike Wash</option>
-        <option value="3D Cleaning">3D Cleaning</option>
-        <option value="Internal Cleaning">Internal Cleaning</option>
-        <option value="External Cleaning">External Cleaning</option>
-        <option value="Engine Cleaning">Engine Cleaning</option>
-        <option value="Glass Treatment">Glass Treatment</option>
-        <option value="Water Spot Removal">Water Spot Removal</option>
-        <option value="Ceramic Coating (2W)">Ceramic Coating (2W)</option>
-        <option value="Graphene Coating (2W)">Graphene Coating (2W)</option>
-        <option value="Graphene Premium (2W)">Graphene Premium (2W)</option>
-        <option value="Polishing (2W)">Polishing (2W)</option>
-        <option value="Ceramic Coating (4W)">Ceramic Coating (4W)</option>
-        <option value="Graphene Coating (4W)">Graphene Coating (4W)</option>
-        <option value="Graphene Premium (4W)">Graphene Premium (4W)</option>
-        <option value="Polishing (4W)">Polishing (4W)</option>
-        <option value="Puncture Simple">Puncture Simple</option>
-        <option value="Puncture Major">Puncture Major</option>
-        <option value="other">Other Service...</option>
-      </select>
-      <input type="number" id="itemQty" value="1" title="Quantity">
-      <input type="number" id="itemPrice" placeholder="Price (₹)">
-      <button class="btn-add" onclick="addItem()">ADD ITEM</button>
-    </div>
+    <!-- Bike Services -->
+    <option value="Bike Wash">Bike Wash</option>
+    <option value="Sport Bike Wash">Sport Bike Wash</option>
+    <option value="Steam Wash (Bike)">Steam Wash (Bike)</option>
+
+    <!-- Car Washing -->
+    <option value="Small Car Wash">Small Car Wash</option>
+    <option value="Big Car Wash">Big Car Wash (SUV)</option>
+    <option value="Top Wash">Top Wash</option>
+    <option value="Interior Cleaning">Interior Cleaning</option>
+    <option value="Exterior Cleaning">Exterior Cleaning</option>
+    <option value="Stream Wash">Stream Wash</option>
+
+    <!-- Tyre & Wheel -->
+    <option value="3D Wheel Alignment">3D Wheel Alignment</option>
+    <option value="3D Tyre Balancing">3D Tyre Balancing</option>
+    <option value="Tyre Changing">Tyre Changing</option>
+    <option value="Balancing Weight">Balancing Weight</option>
+    <option value="Nitrogen Air">Nitrogen Air</option>
+    <option value="Simple Car Puncture (Tubeless)">Simple Car Puncture (Tubeless)</option>
+    <option value="Puncture Mushroom Patch">Puncture Mushroom Patch</option>
+    <option value="Puncture (Tube Type)">Puncture (Tube Type)</option>
+
+    <!-- Detailing -->
+    <option value="Engine Cleaning">Engine Cleaning</option>
+    <option value="Glass Treatment">Glass Treatment</option>
+    <option value="Glass Water Mark Remove">Glass Water Mark Remove</option>
+    <option value="Head Light Restoration">Head Light Restoration</option>
+    <option value="Scratch Remove">Scratch Remove</option>
+    <option value="AC Cleaning">AC Cleaning</option>
+    <option value="Polishing">Polishing</option>
+    <option value="Ceramic Coating">Ceramic Coating</option>
+    <option value="Graphene Coating">Graphene Coating</option>
+    <option value="Borophene Coating">Borophene Coating</option>
+    <option value="Under Body Coating">Under Body Coating</option>
+    <option value="Microfiber Cleaning">Microfiber Cleaning</option>
+    <option value="Car Freshener">Car Freshener</option>
+
+    <option value="other">Other Service...</option>
+  </select>
+
+  <input type="number" id="itemQty" value="1" title="Quantity">
+  <input type="number" id="itemPrice" placeholder="Price (₹)">
+  <button class="btn-add" onclick="addItem()">ADD ITEM</button>
+</div>
     <input type="text" id="otherServiceName" placeholder="Enter Service Name" style="display:none; width: 100%; margin-top: 5px;">
   </div>
 
@@ -265,6 +285,7 @@
 </script>
 </body>
 </html>
+
 
 
 
